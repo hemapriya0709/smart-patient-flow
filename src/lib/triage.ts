@@ -18,7 +18,7 @@ export const STATUSES: Status[] = ["Waiting", "In Consultation", "Completed"];
 
 // Lower rank = seen first. Unassessed patients sit between High and Moderate
 // so they get prompt staff assessment without outranking confirmed emergencies.
-const RANK: Record<string, number> = { Critical: 0, High: 1, Unassessed: 2, Moderate: 3, Low: 4 };
+const RANK: Record<Urgency | "Unassessed", number> = { Critical: 0, High: 1, Unassessed: 2, Moderate: 3, Low: 4 };
 
 export function rankOf(p: Patient) {
   return RANK[p.urgency ?? "Unassessed"];
