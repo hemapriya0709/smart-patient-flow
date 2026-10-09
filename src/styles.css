@@ -61,7 +61,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-teal: var(--teal);
   --color-teal-foreground: var(--teal-foreground);
-  --shadow-card: var(--shadow-card);
+  --shadow-card: var(--elevation-card);
   --color-critical: var(--critical);
   --color-critical-soft: var(--critical-soft);
   --color-high: var(--high);
@@ -95,7 +95,7 @@
   --ring: oklch(0.6 0.1 190);
   --teal: oklch(0.6 0.1 190);
   --teal-foreground: oklch(0.99 0 0);
-  --shadow-card: 0 1px 2px oklch(0.3 0.05 255 / 6%), 0 4px 12px -4px oklch(0.3 0.05 255 / 10%);
+  --elevation-card: 0 1px 2px oklch(0.3 0.05 255 / 6%), 0 4px 12px -4px oklch(0.3 0.05 255 / 10%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
