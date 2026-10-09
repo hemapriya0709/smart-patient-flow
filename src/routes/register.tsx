@@ -20,7 +20,7 @@ export const Route = createFileRoute("/register")({
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name or demo identifier is required").max(80, "Max 80 characters"),
-  age: z.coerce.number({ invalid_type_error: "Age must be a number" }).int("Age must be a whole number").min(0, "Age must be 0 or more").max(120, "Age must be 120 or less"),
+  age: z.coerce.number({ message: "Age must be a number" }).int("Age must be a whole number").min(0, "Age must be 0 or more").max(120, "Age must be 120 or less"),
   symptoms: z.string().trim().min(3, "Describe the symptoms (at least 3 characters)").max(500, "Max 500 characters"),
   conditions: z.string().trim().max(300, "Max 300 characters"),
 });
@@ -50,7 +50,7 @@ function RegisterPage() {
       id, ...r.data, registeredAt: Date.now(), urgency: urgency || null,
       status: "Waiting", assessedBy: urgency ? staff.trim() : undefined,
     });
-    nav({ to: "/", search: { registered: id } as never });
+    nav({ to: "/" });
   };
 
   const err = (k: string) => errors[k] && <p id={`${k}-err`} className="mt-1 text-sm text-critical">{errors[k]}</p>;
