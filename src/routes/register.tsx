@@ -68,14 +68,14 @@ function RegisterPage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <label className="block sm:col-span-2 text-sm font-medium">Name or demo identifier *
-              <input className={field} value={form.name} onChange={set("name")} aria-invalid={!!errors.name} aria-describedby="name-err" placeholder="e.g. Demo Patient Hotel" />{err("name")}
+              <input className={field} value={form.name} onChange={set("name")} aria-invalid={!!errors["name"]} aria-describedby="name-err" placeholder="e.g. Demo Patient Hotel" />{err("name")}
             </label>
             <label className="block text-sm font-medium">Age *
-              <input className={field} inputMode="numeric" value={form.age} onChange={set("age")} aria-invalid={!!errors.age} aria-describedby="age-err" />{err("age")}
+              <input className={field} inputMode="numeric" value={form.age} onChange={set("age")} aria-invalid={!!errors["age"]} aria-describedby="age-err" />{err("age")}
             </label>
           </div>
           <label className="block text-sm font-medium">Symptoms *
-            <textarea className={field} rows={3} value={form.symptoms} onChange={set("symptoms")} aria-invalid={!!errors.symptoms} aria-describedby="symptoms-err" />{err("symptoms")}
+            <textarea className={field} rows={3} value={form.symptoms} onChange={set("symptoms")} aria-invalid={!!errors["symptoms"]} aria-describedby="symptoms-err" />{err("symptoms")}
           </label>
           <label className="block text-sm font-medium">Relevant medical conditions
             <textarea className={field} rows={2} value={form.conditions} onChange={set("conditions")} placeholder="Optional" />{err("conditions")}
