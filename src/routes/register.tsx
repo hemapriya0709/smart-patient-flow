@@ -42,13 +42,13 @@ function RegisterPage() {
     const r = schema.safeParse(form);
     const errs: Record<string, string> = {};
     if (!r.success) r.error.issues.forEach((i) => (errs[String(i.path[0])] ??= i.message));
-    if (form.age.trim() === "") errs.age = "Age is required";
-    if (urgency && !staff.trim()) errs.staff = "Enter the assessing staff member's name";
+    if (form.age.trim() === "") errs["age"] = "Age is required";
+    if (urgency && !staff.trim()) errs["staff"] = "Enter the assessing staff member's name";
     setErrors(errs);
     if (Object.keys(errs).length || !r.success) return;
     store.add({
       id, ...r.data, registeredAt: Date.now(), urgency: urgency || null,
-      status: "Waiting", assessedBy: urgency ? staff.trim() : undefined,
+      status: "Waiting", ...(urgency ? { assessedBy: staff.trim() } : {}),
     });
     nav({ to: "/dashboard" });
   };
