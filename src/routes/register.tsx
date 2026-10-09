@@ -9,9 +9,9 @@ import { generateId, URGENCIES, type Urgency } from "@/lib/triage";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Register Patient — SmartTriage" },
-      { name: "description", content: "Register a fictional demo patient into the SmartTriage emergency queue." },
-      { property: "og:title", content: "Register Patient — SmartTriage" },
+      { title: "Register Patient — MediQueue" },
+      { name: "description", content: "Register a fictional demo patient into the MediQueue emergency queue." },
+      { property: "og:title", content: "Register Patient — MediQueue" },
       { property: "og:description", content: "Register a demo patient and record a staff triage category." },
     ],
   }),
@@ -50,7 +50,7 @@ function RegisterPage() {
       id, ...r.data, registeredAt: Date.now(), urgency: urgency || null,
       status: "Waiting", assessedBy: urgency ? staff.trim() : undefined,
     });
-    nav({ to: "/" });
+    nav({ to: "/dashboard" });
   };
 
   const err = (k: string) => errors[k] && <p id={`${k}-err`} className="mt-1 text-sm text-critical">{errors[k]}</p>;
@@ -58,10 +58,10 @@ function RegisterPage() {
 
   return (
     <AppShell>
-      <h1 className="text-2xl font-semibold">Register patient</h1>
+      <h1 className="text-2xl font-semibold text-primary">Register patient</h1>
       <p className="mt-1 text-sm text-muted-foreground">Use fictional names or demo identifiers only. Do not enter real patient information.</p>
       <form onSubmit={submit} noValidate className="mt-6 grid gap-6 lg:grid-cols-3">
-        <section className="space-y-4 rounded-lg border border-border p-5 lg:col-span-2">
+        <section className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-card lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-2">
             <div><span className="text-sm font-medium">Patient ID</span><p className="mt-1 rounded-md bg-muted px-3 py-2 font-mono text-sm">{id}</p></div>
             <div><span className="text-sm font-medium">Registration time</span><p className="mt-1 rounded-md bg-muted px-3 py-2 text-sm">{now.toLocaleString()} (set on submit)</p></div>
@@ -81,7 +81,7 @@ function RegisterPage() {
             <textarea className={field} rows={2} value={form.conditions} onChange={set("conditions")} placeholder="Optional" />{err("conditions")}
           </label>
         </section>
-        <section className="space-y-4 rounded-lg border border-border p-5">
+        <section className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-semibold">Triage category (staff)</h2>
           <p className="text-xs text-muted-foreground">Recorded by authorized staff using the department protocol. Optional now — unassessed patients are flagged "Needs triage".</p>
           <fieldset className="space-y-2">
@@ -98,7 +98,7 @@ function RegisterPage() {
               <input className={field} value={staff} onChange={(e) => setStaff(e.target.value)} aria-describedby="staff-err" placeholder="Staff name" />{err("staff")}
             </label>
           )}
-          <Button type="submit" className="w-full">Register patient</Button>
+          <div className="flex gap-2"><Button type="button" variant="outline" className="flex-1" onClick={() => nav({ to: "/dashboard" })}>Cancel</Button><Button type="submit" className="flex-1">Register Patient</Button></div>
         </section>
       </form>
     </AppShell>
