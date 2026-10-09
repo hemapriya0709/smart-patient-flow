@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AppShell, StatusBadge, UrgencyBadge } from "@/components/triage-ui";
+import { Card, StatusBadge, UrgencyBadge } from "@/components/triage-ui";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -10,22 +11,10 @@ import { store, useNow, usePatients } from "@/lib/store";
 import { buildQueue, formatWait, needsEscalation, rankOf, STATUSES, URGENCIES, type Patient, type Status, type Urgency } from "@/lib/triage";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "SmartTriage — Emergency Queue Dashboard" },
-      { name: "description", content: "Staff dashboard for prioritizing an emergency department waiting queue by urgency and wait time (demo)." },
-      { property: "og:title", content: "SmartTriage — Emergency Queue Dashboard" },
-      { property: "og:description", content: "Register patients, record triage categories and track patient flow. Demo with fictional data." },
-    ],
-  }),
-  component: Dashboard,
-});
-
 type Pending = { p: Patient; kind: "status"; value: Status } | { p: Patient; kind: "urgency"; value: Urgency };
 const sel = "rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
 
-function Dashboard() {
+export function QueueView({ title, subtitle, showSummary }: { title: string; subtitle: string; showSummary?: boolean }) {
   const { patients, ready } = usePatients();
   const now = useNow();
   const [q, setQ] = useState("");
@@ -34,6 +23,7 @@ function Dashboard() {
   const [sort, setSort] = useState<"priority" | "wait" | "id">("priority");
   const [pending, setPending] = useState<Pending | null>(null);
   const [staff, setStaff] = useState("");
+  const [viewing, setViewing] = useState<Patient | null>(null);
 
   const counts = {
     total: patients.length,
@@ -76,23 +66,23 @@ function Dashboard() {
   };
 
   return (
-    <AppShell>
+    <>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Staff dashboard</h1>
-          <p className="text-sm text-muted-foreground">Queue order: Critical → High → Needs triage → Moderate → Low; longest wait first within each.</p>
+          <h1 className="text-2xl font-semibold text-primary">{title}</h1>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <Button asChild><Link to="/register">+ Register patient</Link></Button>
+        <Button asChild size="lg"><Link to="/register">+ Register Patient</Link></Button>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {[["Total registered", counts.total], ["Currently waiting", counts.waiting], ["In consultation", counts.consult], ["Completed", counts.done]].map(([l, v]) => (
-          <div key={l} className="rounded-lg border border-border p-4">
+      {showSummary && <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[["Total patients", counts.total], ["Waiting", counts.waiting], ["In consultation", counts.consult], ["Completed", counts.done]].map(([l, v]) => (
+          <Card key={l} className="p-4">
             <p className="text-sm text-muted-foreground">{l}</p>
             <p className="mt-1 text-3xl font-semibold text-primary">{ready ? v : "–"}</p>
-          </div>
+          </Card>
         ))}
-      </div>
+      </div>}
 
       {escalations > 0 && (
         <div role="alert" className="mt-4 rounded-lg border border-critical bg-critical-soft px-4 py-3 text-sm text-critical">
@@ -119,10 +109,11 @@ function Dashboard() {
         </select>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-border">
+      <Card className="mt-4 overflow-x-auto">
+        {!ready && <p role="status" className="px-6 py-10 text-center text-sm text-muted-foreground">Loading patients…</p>}
         <table className="w-full min-w-[860px] text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>{["#", "Patient", "Urgency", "Symptoms", "Wait", "Status", "Actions"].map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}</tr>
+            <tr>{["#", "Patient ID / Name", "Urgency", "Symptoms", "Wait", "Status", "Actions"].map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}</tr>
           </thead>
           <tbody>
             {rows.map((p, i) => {
@@ -147,6 +138,7 @@ function Dashboard() {
                       <select aria-label={`Set status for ${p.id}`} value={p.status} onChange={(e) => request(p, "status", e.target.value)} className={sel}>
                         {STATUSES.map((s) => <option key={s}>{s}</option>)}
                       </select>
+                      <Button variant="outline" size="sm" onClick={() => setViewing(p)} aria-label={`View details for ${p.id}`}>View details</Button>
                     </div>
                   </td>
                 </tr>
@@ -166,13 +158,34 @@ function Dashboard() {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       <div className="mt-6 flex flex-wrap gap-2 text-xs text-muted-foreground">
         <span>Storage: this browser (localStorage). Clearing browser data removes it.</span>
         <button className="underline hover:text-foreground" onClick={() => window.confirm("Replace all data with the fictional demo patients?") && store.reset()}>Reset demo data</button>
         <button className="underline hover:text-foreground" onClick={() => window.confirm("Remove all patients?") && store.clear()}>Clear all</button>
       </div>
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent>
+          {viewing && <>
+            <DialogHeader>
+              <DialogTitle>{viewing.id} — {viewing.name}</DialogTitle>
+              <DialogDescription>Fictional demo record</DialogDescription>
+            </DialogHeader>
+            <dl className="grid grid-cols-3 gap-x-4 gap-y-2 text-sm">
+              <dt className="text-muted-foreground">Age</dt><dd className="col-span-2">{viewing.age}</dd>
+              <dt className="text-muted-foreground">Urgency</dt><dd className="col-span-2"><UrgencyBadge urgency={viewing.urgency} /></dd>
+              <dt className="text-muted-foreground">Status</dt><dd className="col-span-2"><StatusBadge status={viewing.status} /></dd>
+              <dt className="text-muted-foreground">Registered</dt><dd className="col-span-2">{new Date(viewing.registeredAt).toLocaleString()}</dd>
+              <dt className="text-muted-foreground">Waiting</dt><dd className="col-span-2">{viewing.status === "Completed" ? "—" : formatWait(now - viewing.registeredAt)}</dd>
+              <dt className="text-muted-foreground">Symptoms</dt><dd className="col-span-2">{viewing.symptoms}</dd>
+              <dt className="text-muted-foreground">Conditions</dt><dd className="col-span-2">{viewing.conditions || "—"}</dd>
+              <dt className="text-muted-foreground">Assessed by</dt><dd className="col-span-2">{viewing.assessedBy ?? "Not yet assessed"}</dd>
+            </dl>
+          </>}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
         <AlertDialogContent>
@@ -195,6 +208,6 @@ function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AppShell>
+    </>
   );
 }
